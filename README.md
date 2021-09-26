@@ -1,7 +1,7 @@
 # NCCU_CG_Course
 
 
-##Usage
+## Usage
 Please using command down below to clone repository
 
 ```
