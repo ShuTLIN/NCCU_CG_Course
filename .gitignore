@@ -33,3 +33,6 @@
 
 #vs user setting
 .vs
+
+#cmake dev folder
+.out
