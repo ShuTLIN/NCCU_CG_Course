@@ -9,6 +9,12 @@
 */
 
 #define OGT_VOX_IMPLEMENTATION
+
+#if defined(__APPLE__)
+    #include <stdint.h>
+    #include <stddef.h>
+#endif
+
 #include "ogt_vox.h"
 
 #if defined(_MSC_VER)

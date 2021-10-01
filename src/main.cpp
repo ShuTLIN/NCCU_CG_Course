@@ -97,8 +97,8 @@ int main(int argc, char** argv) {
 
     //load shader, model and setting camera
     view camera(45.0f, half_width / half_height, glm::vec3(0.0f, -50.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    shader voxShader("../shaders/vshader.glsl", "../shaders/fshader.glsl");
-    loadmodel model("../models/sword.vox");
+    shader voxShader("./shaders/vshader.glsl", "./shaders/fshader.glsl");
+    loadmodel model("./models/sword.vox");
 
     //binding all together
     renderer voxel(model, voxShader, camera);
