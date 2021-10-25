@@ -1,5 +1,8 @@
 #version 330
 
+uniform float u_width;
+uniform float u_height;
+
 in vec3 position;
 in mat4 viewMatrix;
 in mat4 projMatrix;
@@ -45,7 +48,7 @@ float computeLinearDepth(vec3 pos) {
 }
 
 void main() {
-    vec2 uv= (gl_FragCoord.xy/800.0)*2 -1;
+    vec2 uv= (gl_FragCoord.xy/vec2(u_width,u_height))*2 -1;
 
       // unprojecting on the near plane
     vec3 nearPoint = UnprojectPoint(uv.x, uv.y, 0.0, viewMatrix, projMatrix).xyz;

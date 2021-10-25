@@ -70,6 +70,7 @@ private:
 	std::vector<glm::vec4> vertexData;
 	voxelBuffer initVoxelData;
 
+	glm::vec3 oldRotate;
 	glm::mat4 modelMatrix;
 	glm::mat4 localTranslateMatrix;
 	glm::mat4 localRotateMatrix;

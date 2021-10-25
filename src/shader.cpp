@@ -195,7 +195,7 @@ void shader::initUniform(uniformConfig& uniform) {
 				memcpy((char*)uniformBuffer + offsetByte, (uniformDataPtr[0]) , uniformList.size);
 
 				glUniform3fv(uniformList.index , 1, (float*)((char*)uniformBuffer + offsetByte));
-				std::cout << "check uniform: " << element << std::endl;
+				
 				//std::cout << *((float*)uniformDataPtr[0]+1) << std::endl;
 			}
 
@@ -251,7 +251,7 @@ void shader::setUniformBuffer() {
 	for (auto& element : uniformPropsList) {
 		uint32_t uniformIndex = getShaderUniformLocation(element.name.c_str());
 		element.index = uniformIndex;
-
+		
 		//get uniform variable data type
 		glGetActiveUniform(shaderProgramID, uniformIndex, bufSize, &length, &size, &type, name);
 		//std::cout << type << std::endl;
@@ -275,9 +275,10 @@ void shader::setUniformBuffer() {
 			std::cout << "Not find property type match this uniform data type" << std::endl;
 			break;
 		}
-		std::cout << "shader uniform: " << name << std::endl;
+		std::cout << "shader uniform: " << element.name << std::endl;
 		std::cout << "Index: " << uniformIndex << std::endl;
 		std::cout << "Uniform DataBuffer Size: " << BufferSize << " bytes" << std::endl;
+		std::cout << "++++++++++++++++++++++++++++++++++++" << std::endl;
 	}
 
 	uniformBufferSize = BufferSize;

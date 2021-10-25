@@ -17,7 +17,7 @@ extern float mouseMiddle_yoffset;
 extern float mouseRight_xoffset;
 extern float mouseRight_yoffset;
 
-GLfloat half_width = 400, half_height = 400, half_depth = 600;
+GLfloat window_width = 800, window_height = 800;
 
 int main(int argc, char** argv) {
     //! The pointer to the GLFW window
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 
 
     // ! Create a windowed mode window and its OpenGL context
-    window = glfwCreateWindow(half_width * 2, half_height * 2, "NCCU CG Course OpenGL Template", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "NCCU CG Course OpenGL Template", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     //load shader, model and setting camera
-    view camera(45.0f, half_width / half_height, glm::vec3(0.0f, -25.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    view camera(45.0f, window_width / window_height , glm::vec3(0.0f, -25.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     shader voxShader("./shaders/vshader.glsl", "./shaders/fshader.glsl");
     shader gridShader("./shaders/vgrid.glsl","./shaders/fgrid.glsl");
     loadmodel model("./models/sword.vox");
@@ -119,11 +119,14 @@ int main(int argc, char** argv) {
     uniformConfig uniformInfo(uniformname, uniformdata);
 
     //binding all together
-    renderer voxel(model, voxShader, camera, uniformInfo);
-    renderer grid(gridModel, gridShader, camera);
+    renderer voxel(model , voxShader , camera , uniformInfo);
+    renderer grid(gridModel , gridShader , camera);
 
   // Loop until the user closes the window
   while (glfwWindowShouldClose(window) == 0) {
+    gridShader.bindShaderProgram();
+    glUniform1f(gridShader.getShaderUniformLocation("u_width"), window_width);
+    glUniform1f(gridShader.getShaderUniformLocation("u_height"), window_height);
 
     //listen to mouse event
     if (mouseEvent) {
@@ -162,9 +165,12 @@ int main(int argc, char** argv) {
     //Imgui Rendering
     ImGui::Render();
     int display_w, display_h;
+    
     glfwGetFramebufferSize(window, &display_w, &display_h);
+    
     glViewport(0, 0, display_w, display_h);
-
+    window_width = display_w;
+    window_height = display_h;
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     // Swap front and back buffers

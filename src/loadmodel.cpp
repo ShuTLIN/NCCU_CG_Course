@@ -4,6 +4,12 @@ void demo_load_and_save(std::string filepath, voxelRecord& voxel);
 
 loadmodel::loadmodel(const std::string &voxelModelFilepath) {
   modelMatrix = glm::mat4(1.0f);
+  localTranslateMatrix = glm::mat4(1.0f);
+  localRotateMatrix = glm::mat4(1.0f);
+  localScaleMatrix = glm::mat4(1.0f);
+  globalRotateMatrix = glm::mat4(1.0f);
+  oldRotate = glm::vec3(0.0f);
+
   modelType = "Voxel";
   voxelBuffer  data;
   demo_load_and_save(voxelModelFilepath, voxelModel);
@@ -304,10 +310,17 @@ void loadmodel::localRotate(float_t x, float_t y, float_t z) {
 
 void loadmodel::globalRotate(float_t x, float_t y, float_t z) {
 	glm::mat4 rotate(1.0f);
-	rotate = glm::rotate(rotate, glm::radians(x), glm::vec3(1.0f, 0.0f, 0.0f));
-	rotate = glm::rotate(rotate, glm::radians(y), glm::vec3(0.0f, 1.0f, 0.0f));
-	rotate = glm::rotate(rotate, glm::radians(z), glm::vec3(0.0f, 0.0f, 1.0f));
-	globalRotateMatrix = rotate;
+	glm::vec3 currentRotate(x, y, z);
+	glm::vec3 different = currentRotate - oldRotate;
+
+	if ( !((different.x==0.0) && (different.y == 0.0) && (different.z == 0.0)) ) {
+		rotate = glm::rotate(rotate, glm::radians(currentRotate.x - oldRotate.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		rotate = glm::rotate(rotate, glm::radians(currentRotate.y - oldRotate.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		rotate = glm::rotate(rotate, glm::radians(currentRotate.z - oldRotate.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		oldRotate = currentRotate;
+		globalRotateMatrix = rotate * globalRotateMatrix;
+	}
 };
 
 uint32_t loadmodel::getVertexNum() {
