@@ -96,12 +96,11 @@ int main(int argc, char** argv) {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     //load shader, model and setting camera
-    view camera(45.0f, half_width / half_height, glm::vec3(0.0f, -50.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    view camera(45.0f, half_width / half_height, glm::vec3(0.0f, -25.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     shader voxShader("./shaders/vshader.glsl", "./shaders/fshader.glsl");
+    shader gridShader("./shaders/vgrid.glsl","./shaders/fgrid.glsl");
     loadmodel model("./models/sword.vox");
-
-    //binding all together
-    renderer voxel(model, voxShader, camera);
+    loadmodel gridModel;
 
     // Our Imgui state
     bool show_demo_window = true;
@@ -111,7 +110,17 @@ int main(int argc, char** argv) {
     static float_t localRotate[3] = { 0.0f, 0.0f ,0.0f };
     static float_t globalRotate[3] = { 0.0f, 0.0f ,0.0f };
     static float_t localScale[3] = { 1.0f, 1.0f ,1.0f };
+    static float_t lightDir[3] = { 1.0f, 0.0f ,0.0f };
     
+
+    //create buffer to contain default uniform variable value that will be used in shader 
+    std::vector<std::string> uniformname = { "u_lightDir" };
+    std::vector<void*> uniformdata = { &lightDir[0] };
+    uniformConfig uniformInfo(uniformname, uniformdata);
+
+    //binding all together
+    renderer voxel(model, voxShader, camera, uniformInfo);
+    renderer grid(gridModel, gridShader, camera);
 
   // Loop until the user closes the window
   while (glfwWindowShouldClose(window) == 0) {
@@ -122,7 +131,9 @@ int main(int argc, char** argv) {
         mouseEvent = false;
     }
     // Render model here
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     voxel.render();
+    grid.render();
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -137,10 +148,12 @@ int main(int argc, char** argv) {
         ImGui::SliderFloat3("Local Scale.", &localScale[0], 1.0f, 10.0f);
         ImGui::SliderFloat3("Global Rotate.", &globalRotate[0], -360.0f, 360.0f);
 
+
         model.localTranslate(localTrans[0], localTrans[1], localTrans[2]);
         model.localRotate(localRotate[0], localRotate[1], localRotate[2]);
         model.localScale(localScale[0], localScale[1], localScale[2]);
         model.globalRotate(globalRotate[0], globalRotate[1], globalRotate[2]);
+
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();

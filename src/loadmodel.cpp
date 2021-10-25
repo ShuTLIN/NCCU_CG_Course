@@ -1,32 +1,182 @@
 #include<loadmodel.h>
-void demo_load_and_save(std::string filepath, voxel_record& voxel);
+void demo_load_and_save(std::string filepath, voxelRecord& voxel);
 
 
 loadmodel::loadmodel(const std::string &voxelModelFilepath) {
   modelMatrix = glm::mat4(1.0f);
-  databuffer  data;
-  demo_load_and_save(voxelModelFilepath, voxel_model);
+  modelType = "Voxel";
+  voxelBuffer  data;
+  demo_load_and_save(voxelModelFilepath, voxelModel);
   printVoxelRecord();
 
-  //initialize first voxel index buffer
-  std::vector<uint32_t> firstVoxelIndexs = std::vector<uint32_t>({
-	0,1,3,0,3,2,
-	0,1,5,0,5,4,
-	1,3,7,1,7,5,
-	0,4,6,2,0,6,
-	2,3,7,2,7,6,
-	4,5,7,4,7,6
-	  });
-  indexdata = firstVoxelIndexs;
 
+  /*
+    glm::vec4 vertexPos
+	glm::vec4 vertexColor
+	glm::vec3 vertexNormal
+	*/
+  data = {
+	//bottom face
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , -1.0f , 0.0f),
+
+	glm::vec4(1.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , -1.0f , 0.0f),
+
+	glm::vec4(1.0f , 1.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , -1.0f , 0.0f),
+
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , -1.0f , 0.0f),
+
+	glm::vec4(1.0f , 1.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , -1.0f , 0.0f),
+
+	glm::vec4(0.0f , 1.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , -1.0f , 0.0f),
+
+	//right face
+	glm::vec4(1.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(1.0f , 1.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(1.0f , 1.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(1.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(1.0f , 1.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(1.0f , 0.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(1.0f , 0.0f , 0.0f , 0.0f),
+
+	//back face
+	glm::vec4(0.0f , 1.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 1.0f , 0.0f , 0.0f),
+
+	glm::vec4(1.0f , 1.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 1.0f , 0.0f , 0.0f),
+
+	glm::vec4(1.0f , 1.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 1.0f , 0.0f , 0.0f),
+
+	glm::vec4(0.0f , 1.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 1.0f , 0.0f , 0.0f),
+
+	glm::vec4(1.0f , 1.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 1.0f , 0.0f , 0.0f),
+
+	glm::vec4(0.0f , 1.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 1.0f , 0.0f , 0.0f),
+
+	//left face
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(-1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(0.0f , 0.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(-1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(0.0f , 1.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(-1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(0.0f , 1.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(-1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(-1.0f , 0.0f , 0.0f , 0.0f),
+
+	glm::vec4(0.0f , 1.0f , 1.0f , 1.0f),
+	glm::vec4(0.0f , 0.0f , 0.0f , 1.0f),
+	glm::vec4(-1.0f , 0.0f , 0.0f , 0.0f),
+
+	//front face
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+
+	glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+
+	glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+
+	glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+
+	glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+
+	//top face
+	glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+
+	glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+
+	glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+
+	glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+
+	glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+
+	glm::vec4(0.0f, 1.0f, 1.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+};
+
+  initVoxelData = data;
   int32_t index = 0;
-  //walk through all vexel coordinate
-  for (int32_t z = ceil(-voxel_model.z_dimension/2.0) ; z < voxel_model.z_dimension / 2.0; z++) {
 
-	  for (int32_t y = ceil(-voxel_model.y_dimension / 2.0); y < voxel_model.y_dimension / 2.0; y++) {
+  //go through all voxel coordinate and crate voxel vertices
+  for (int32_t z = ceil(-voxelModel.zDimension/2.0) ; z < voxelModel.zDimension / 2.0; z++) {
 
-		  for (int32_t x = ceil(-voxel_model.x_dimension / 2.0); x < voxel_model.x_dimension / 2.0; x++) {
-			  vec3 voxelColor = voxel_model.colors[index++];
+	  for (int32_t y = ceil(-voxelModel.yDimension / 2.0); y < voxelModel.yDimension / 2.0; y++) {
+
+		  for (int32_t x = ceil(-voxelModel.xDimension / 2.0); x < voxelModel.xDimension / 2.0; x++) {
+			  vec3 voxelColor = voxelModel.colors[index++];
 			  genOneVoxeldata(x , y, z , index ,voxelColor);
 
 			  //std::cout << "( " << x << "," << y << "," << z << ")" << std::endl;
@@ -38,6 +188,23 @@ loadmodel::loadmodel(const std::string &voxelModelFilepath) {
   std::cout << "Load Complete--------------------------------------------------------" << std::endl;
 }
 
+loadmodel::loadmodel() {
+	modelType = "Vertex";
+
+	// Grid position are in xy clipped space
+	std::vector<glm::vec4> gridPlane = {
+		glm::vec4(1.0f , 1.0f , 0.0f , 1.0f),
+		glm::vec4(-1.0f , -1.0f , 0.0f , 1.0f),
+		glm::vec4(-1.0f , 1.0f , 0.0f , 1.0f),
+		glm::vec4(1.0f , 1.0f , 0.0f , 1.0f),
+		glm::vec4(1.0f , -1.0f , 0.0f , 1.0f),
+		glm::vec4(-1.0f , -1.0f , 0.0f , 1.0f)
+	};
+
+	vertexData = gridPlane;
+	std::cout << "Vertex Load Complete--------------------------------------------------------" << std::endl;
+}
+
 loadmodel::~loadmodel() {
 
 }
@@ -45,26 +212,25 @@ loadmodel::~loadmodel() {
 void loadmodel::genBuffer() {
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ibo);
 	
-	uint32_t buffer_len = modeldata.size() * sizeof(databuffer);
-	uint32_t index_buffer_len = indexdata.size() * sizeof(uint32_t);
+	uint32_t buffer_len;
+	if (modelType == "Voxel") {
+		buffer_len = modeldata.size() * sizeof(initVoxelData);
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, buffer_len, &modeldata[0], GL_STATIC_DRAW);
+	}
+	if (modelType == "Vertex") {
+		buffer_len = vertexData.size() * sizeof(glm::vec4);
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, buffer_len, &vertexData[0], GL_STATIC_DRAW);
+	}
 	
+	//std::cout << modeldata.size() << std::endl;
 	//std::cout << indexdata.size() << std::endl;
 	
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, buffer_len, &modeldata[0] , GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), BUFFER_OFFSET(0));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), BUFFER_OFFSET(4*sizeof(float)));
 	
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_buffer_len, &indexdata[0] , GL_STATIC_DRAW);
-
 }
 
 void loadmodel::bindVao() {
@@ -88,39 +254,29 @@ uint32_t loadmodel::getIndexLen() {
 }
 
 void loadmodel::printVoxelRecord() {
-	std::cout << "x dimension:  " << voxel_model.x_dimension << std::endl;
-	std::cout << "y dimension:  " << voxel_model.y_dimension << std::endl;
-	std::cout << "z dimension:  " << voxel_model.z_dimension << std::endl;
-	std::cout << "total voxels:  " << voxel_model.total_voxels << std::endl;
+	std::cout << "x dimension:  " << voxelModel.xDimension << std::endl;
+	std::cout << "y dimension:  " << voxelModel.yDimension << std::endl;
+	std::cout << "z dimension:  " << voxelModel.zDimension << std::endl;
+	std::cout << "total voxels:  " << voxelModel.totalVoxels << std::endl;
 };
 
 void loadmodel::genOneVoxeldata(int32_t x, int32_t y, int32_t z, int32_t voxel_index ,vec3 color) {
-	for (int32_t z_offset = 0; z_offset < 2; z_offset++) {
-		for (int32_t y_offset = 0; y_offset < 2; y_offset++) {
-			for (int32_t x_offset = 0; x_offset < 2; x_offset++) {
 
-				//std::cout << (float_t)x + (float_t)x_offset << " " << (float_t)y + (float_t)y_offset << " " << " " << (float_t)z + (float_t)z_offset << std::endl;
-		
-				if ( !(color.x == 0 && color.y == 0 && color.z == 0) ) {
-					databuffer  data;
-					data.vertexPos = glm::vec4((float_t)x + (float_t)x_offset, (float_t)y + (float_t)y_offset, (float_t)z + (float_t)z_offset, 1.0f);
-					data.vertexColor = glm::vec4((float_t)color.x / 255.0f, (float_t)color.y / 255.0f, (float_t)color.z / 255.0f, 1.0f);
-					modeldata.push_back(data);
-				}			
-			}
+	if (!(color.x == 0 && color.y == 0 && color.z == 0)) {
+		voxelBuffer  tmpData;
+		tmpData = initVoxelData;
+		for (int i = 0; i < sizeof(initVoxelData) / sizeof(vertexBuffer); i++) {
+			tmpData.vexelVertex[i].vertexPos += glm::vec4((float_t)x, (float_t)y, (float_t)z, 0.0f);
+			tmpData.vexelVertex[i].vertexColor = glm::vec4((float_t)color.x / 255.0f, (float_t)color.y / 255.0f, (float_t)color.z / 255.0f, 1.0f);
 		}
-	}
+	
+		modeldata.push_back(tmpData);
 
-	if (voxel_index > 0) {
-		for (int32_t index = 0; index < 36; index++) {
-			uint32_t new_index = indexdata[index] + (uint32_t)8 * (uint32_t)voxel_index;
-			indexdata.push_back(new_index);
-		}
 	}
 };
 
 glm::mat4 loadmodel::getModelMatrix() {
-	return globalRotateMatrix  * localTranslateMatrix * localScaleMatrix * localRotateMatrix;
+	return globalRotateMatrix  * localTranslateMatrix  * localRotateMatrix * localScaleMatrix;
 };
 
 void loadmodel::localTranslate(float_t x, float_t y, float_t z) {
@@ -153,3 +309,17 @@ void loadmodel::globalRotate(float_t x, float_t y, float_t z) {
 	rotate = glm::rotate(rotate, glm::radians(z), glm::vec3(0.0f, 0.0f, 1.0f));
 	globalRotateMatrix = rotate;
 };
+
+uint32_t loadmodel::getVertexNum() {
+	
+	/*
+	one voxel have 36 vertices data
+	total voxel*36 is total vertices
+	*/
+	if(modelType=="Voxel") return modeldata.size() * 36;
+	if(modelType=="Vertex") return vertexData.size();
+}
+
+std::string loadmodel::getModelType() {
+	return modelType;
+}

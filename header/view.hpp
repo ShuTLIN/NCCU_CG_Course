@@ -21,31 +21,29 @@ class view {
   glm::vec3 getViewSpaceXaxis();
   glm::vec3 getViewSpaceYaxis();
   glm::vec3 getViewSpaceZaxis();
-  glm::mat4 getViewProjMatrix();
+  glm::mat4 getViewMatrix();
+  glm::mat4 getProjMatrix();
 
  private:
-  float_t scroll_factor;
-  float_t offset_factor;
-  glm::vec3 camera_position;
-  glm::vec3 camera_lookDir;
-  glm::vec3 camera_up;
-  glm::vec3 camera_xoffset;
-  glm::vec3 camera_yoffset;
+  float_t scrollFactor;
+  float_t offsetFactor;
+  glm::vec3 cameraPosition;
+  glm::vec3 cameraLookDir;
+  glm::vec3 cameraUp;
+  glm::vec3 cameraXoffset;
+  glm::vec3 cameraYoffset;
  
+  float_t nearPlane;
+  float_t farPlane;
+  float_t oldMouseScroll;
+  float_t oldMouseMiddleXoffset;
+  float_t oldMouseMiddleYoffset;
 
-  float_t view_ratio;
-  float_t width_height_ratio;
-  float_t mouse_middle_xRecord;
-  float_t mouse_middle_yRecord;
-
-  uint32_t v_position;
-  uint32_t v_color;
-  uint32_t u_model_view_matrix;
-
-  glm::mat4 ortho_matrix;
-  glm::mat4 view_proj_matrix;
-  glm::mat4 persp_matrix;
-  glm::mat4 lookAt_matrix;
+  glm::mat4 orthoMatrix;
+  glm::mat4 perspMatrix;
+  glm::mat4 lookAtMatrix;
+  glm::mat4 viewMatrix;
+  glm::mat4 projMatrix;
 
   glm::vec3 viewspaceXaxis;
   glm::vec3 viewspaceYaxis;

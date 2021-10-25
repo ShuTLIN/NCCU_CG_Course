@@ -15,7 +15,9 @@
     #include <stddef.h>
 #endif
 
+
 #include "ogt_vox.h"
+
 
 #if defined(_MSC_VER)
     #include <io.h>
@@ -26,7 +28,7 @@
 
 
 
-struct voxel_record {
+struct voxelRecord {
     int32_t x_dimension;
     int32_t y_dimension;
     int32_t z_dimension;
@@ -119,7 +121,7 @@ uint32_t count_solid_voxels_in_model(const ogt_vox_model* model)
     return solid_voxel_count;
 }
 
-void demo_load_and_save(std::string filepath, voxel_record& voxel)
+void demo_load_and_save(std::string filepath, voxelRecord& voxel)
 {
     auto filepath_cstring = filepath.c_str();
     const ogt_vox_scene* scene = load_vox_scene_with_groups(filepath_cstring);

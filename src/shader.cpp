@@ -10,9 +10,73 @@ shader::shader(const std::string& vertexShaderPath, const std::string& fragShade
 	std::string line;
 	while (getline(vertex, line)) {
 		vertexSource << line << "\n";
+
+		if (line.find("uniform") != std::string::npos) {
+
+			//erase semicolon and find uniform variable name
+			line = line.erase(line.length() - 1, line.length());
+			while (line.find(" ") != std::string::npos) {
+				line = line.substr(line.find(" ") + 1, line.length());
+			}
+
+			uniformProp uniformInfo;
+			uniformInfo.name = line;
+			uniformPropsList.push_back(uniformInfo);
+			//std::cout <<"Vertex uniform: " << line << std::endl;
+		}
+
+		if (line.find("layout") != std::string::npos) {
+			attribProp attrib;
+
+			//remove all space
+			std::string::iterator end_pos = std::remove(line.begin(), line.end(), ' ');
+			line.erase(end_pos, line.end());
+
+			//erase semicolon and find uniform variable name
+			line.erase(line.length() - 1, line.length());
+
+			std::string varName = line;
+			varName.erase(0 , line.find("v_"));
+			attrib.name = varName;
+			//std::cout << "vertex attribute name: " << varName << " | ";
+
+			std::string location = line;
+			int32_t leftParenthesis = location.find("(");
+			int32_t rightParenthesis = location.find(")") - line.find("(");
+			location = location.substr(leftParenthesis + 1, rightParenthesis-1);
+			location = location.substr(location.find("=") + 1, location.find("=") + 2);
+
+			
+			if (stoi(location) == -1) {
+				std::cout << "not get correct vertex attribute location: "<<std::endl;
+			}
+			else {
+				uint32_t idx = stoi(location);
+				attrib.index = idx;
+			}
+
+			attribPropList.push_back(attrib);
+			//std::cout << "vertex attribute location: " << line << std::endl;
+		}
 	}
+
 	while (getline(fragment, line)) {
-		fragmentSource << line << "\n";
+		fragmentSource << line << "\n";	
+
+
+		if (line.find("uniform") != std::string::npos) {
+
+			//erase semicolon and find uniform variable name
+			line = line.erase(line.length() - 1, line.length());
+			while (line.find(" ") != std::string::npos) {
+				line = line.substr(line.find(" ") + 1, line.length());
+			}
+
+			uniformProp uniformInfo;
+			uniformInfo.name = line;
+			uniformPropsList.push_back(uniformInfo);
+			//std::cout << "Fragment uniform: " << line << std::endl;
+		}
 	}
 
 	vertexShader = vertexSource.str();
@@ -86,6 +150,16 @@ void shader::genShaderProgram() {
 
 void shader::bindShaderProgram() {
 	glUseProgram(shaderProgramID);
+
+	if (!uniformSet) {
+		setUniformBuffer();
+		uniformSet = true;
+	}
+
+	if (!attribSet) {
+		shader::setVertexAttrib();
+		attribSet = true;
+	}
 	//std::cout << shaderProgramID << std::endl;
 }
 
@@ -98,6 +172,39 @@ void shader::printShaderContent() {
 	std::cout << fragShader << std::endl;
 }
 
+uint32_t shader::getUniformBifferSize() {
+	return uniformBufferSize;
+}
+
+std::vector<uniformProp> shader::getUniformInfo() {
+	return uniformPropsList;
+}
+
+void shader::initUniform(uniformConfig& uniform) {
+	std::vector<std::string> uniformName= uniform.getUniformList();
+	std::vector<void*> uniformDataPtr= uniform.getUniformDataPtrList();
+	
+	uint32_t offsetByte = 0;
+	for (auto& element : uniformName) {
+		for (auto& uniformList : uniformPropsList) {
+			if (element.find(uniformList.name) != std::string::npos) {
+
+				bindShaderProgram();
+
+				std::cout << "current offset byte: " << offsetByte <<std::endl;
+				memcpy((char*)uniformBuffer + offsetByte, (uniformDataPtr[0]) , uniformList.size);
+
+				glUniform3fv(uniformList.index , 1, (float*)((char*)uniformBuffer + offsetByte));
+				std::cout << "check uniform: " << element << std::endl;
+				//std::cout << *((float*)uniformDataPtr[0]+1) << std::endl;
+			}
+
+			offsetByte += uniformList.size;
+		}
+		
+	}
+}
+
 uint32_t shader::getShaderAttribLocation( const char* parameter) {
 	return glGetAttribLocation(shaderProgramID, parameter);
 }
@@ -105,3 +212,74 @@ uint32_t shader::getShaderAttribLocation( const char* parameter) {
 uint32_t shader::getShaderUniformLocation( const char* parameter) {
 	return glGetUniformLocation(shaderProgramID, parameter);
 }
+
+void shader::setCamUniformLocation(glm::mat4* matrix) {
+
+};
+
+bool shader::findUniformName(const std::string& name) {
+	for (auto& element : uniformPropsList) {
+		if (element.name.find(name) != std::string::npos) {
+			//std::cout << "Find uniform name: " << element.name << std::endl;
+			return true;
+		}
+	}
+}
+
+void shader::setVertexAttrib() {
+	uint32_t offset = 0;
+	
+	for (auto& element : attribPropList) {
+		const char* n = element.name.c_str();
+		glEnableVertexAttribArray(element.index);
+		glVertexAttribPointer(getShaderAttribLocation(element.name.c_str()), 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float) * attribPropList.size() , BUFFER_OFFSET(offset));
+		offset += sizeof(glm::vec4);
+
+		//std::cout << getShaderAttribLocation(element.name.c_str()) <<" | "<< element.name.c_str() << " | " << offset << std::endl;
+	}
+}
+
+void shader::setUniformBuffer() {
+	int32_t size; // size of the variable
+	GLenum type; // type of the variable (float, vec3 or mat4, etc)
+
+	const uint32_t bufSize = 16; // maximum name length
+	GLchar name[bufSize]; // variable name in GLSL
+	int32_t  length; // name length
+	uint32_t BufferSize = 0;
+
+	for (auto& element : uniformPropsList) {
+		uint32_t uniformIndex = getShaderUniformLocation(element.name.c_str());
+		element.index = uniformIndex;
+
+		//get uniform variable data type
+		glGetActiveUniform(shaderProgramID, uniformIndex, bufSize, &length, &size, &type, name);
+		//std::cout << type << std::endl;
+		element.type = type;
+		switch (type) {
+		case GL_FLOAT_VEC3:
+			//std::cout << "float vec3" << std::endl;
+			element.size = 4 * 3;
+			BufferSize += element.size;
+			break;
+		case GL_FLOAT:
+			//std::cout << "float" << std::endl;
+			element.size = 4;
+			BufferSize += element.size;
+			break;
+		case GL_FLOAT_MAT4:
+			element.size = 4 * 4 * 4;
+			BufferSize += element.size;
+			break;
+		default:
+			std::cout << "Not find property type match this uniform data type" << std::endl;
+			break;
+		}
+		std::cout << "shader uniform: " << name << std::endl;
+		std::cout << "Index: " << uniformIndex << std::endl;
+		std::cout << "Uniform DataBuffer Size: " << BufferSize << " bytes" << std::endl;
+	}
+
+	uniformBufferSize = BufferSize;
+	uniformBuffer = (void*)malloc(uniformBufferSize);
+};

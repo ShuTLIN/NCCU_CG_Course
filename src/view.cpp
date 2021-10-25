@@ -2,22 +2,31 @@
 view::view(float_t view_ratio, float_t width_height_ratio, glm::vec3 pos, glm::vec3 lookat, glm::vec3 up) {
 	
 	//Setup and initialize all camera needs
-	scroll_factor = 1.0f;
-	offset_factor = 0.01f;
-	camera_position = pos;
-	camera_up = up;
+	scrollFactor = 1.0f;
+	offsetFactor = 0.01f;
+	cameraPosition = pos;
+	cameraUp = up;
 
-	persp_matrix = glm::perspective(glm::radians(view_ratio), width_height_ratio, 1.0f, 300.0f);
-	lookAt_matrix = glm::lookAt(camera_position, lookat, camera_up);
-	view_proj_matrix = persp_matrix * lookAt_matrix;
 
-	viewspaceZaxis = glm::normalize(camera_position);
-	viewspaceXaxis = glm::normalize(glm::cross(-viewspaceZaxis, camera_up));
+	nearPlane = 1.0f;
+	farPlane = 300.0f;
+	perspMatrix = glm::perspective(glm::radians(view_ratio), width_height_ratio, 0.1f, 300.0f);
+	lookAtMatrix = glm::lookAt(cameraPosition, lookat, cameraUp);
+	
+	viewMatrix = lookAtMatrix;
+	projMatrix = perspMatrix;
+
+	viewspaceZaxis = glm::normalize(cameraPosition);
+	viewspaceXaxis = glm::normalize(glm::cross(-viewspaceZaxis, cameraUp));
 	viewspaceYaxis = glm::normalize(glm::cross(viewspaceXaxis, -viewspaceZaxis));
 
-	camera_lookDir = -viewspaceZaxis;
-	camera_xoffset = viewspaceXaxis;
-	camera_yoffset = viewspaceYaxis;
+	cameraLookDir = -viewspaceZaxis;
+	cameraXoffset = viewspaceXaxis;
+	cameraYoffset = viewspaceYaxis;
+
+	oldMouseScroll = 0.0;
+	oldMouseMiddleXoffset = 0.0;
+	oldMouseMiddleYoffset = 0.0;
 };
 
 view::view() {
@@ -26,7 +35,6 @@ view::view() {
 
 
 void view::updateViewMatrix(float_t mouseScroll , float_t mouseMiddle_xoffset, float_t mouseMiddle_yoffset, float_t mouseRight_xoffset,float_t mouseRight_yoffset) {
-	glm::vec3 update_position = camera_position;
 	glm::mat4 view = glm::mat4(glm::vec4(viewspaceXaxis, 0.0f), glm::vec4(viewspaceYaxis, 0.0f), glm::vec4(viewspaceZaxis, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	if (mouseRight_xoffset != 0.0 || mouseRight_yoffset != 0.0) {
@@ -43,31 +51,41 @@ void view::updateViewMatrix(float_t mouseScroll , float_t mouseMiddle_xoffset, f
 		view[1] = rotateYaxis;
 		view[2] = rotateZaxis;
 
-		camera_lookDir = viewDir;
-		camera_xoffset = glm::vec3(rotateXaxis);
-		camera_yoffset = glm::vec3(rotateYaxis);
+		cameraLookDir = viewDir;
+		cameraXoffset = glm::vec3(rotateXaxis);
+		cameraYoffset = glm::vec3(rotateYaxis);
 
 	}
-	if (mouseScroll != 0.0) {
-		update_position += mouseScroll * scroll_factor * camera_lookDir;
+	if ( (oldMouseScroll - mouseScroll) != (float_t)0.0) {
+		cameraPosition += -(oldMouseScroll - mouseScroll) * cameraLookDir;
+		oldMouseScroll = mouseScroll;
 	}
-	if (mouseMiddle_xoffset != 0.0) {
-		update_position += mouseMiddle_xoffset * offset_factor * -camera_xoffset;
+	if ( (oldMouseMiddleXoffset- mouseMiddle_xoffset) != (float_t)0.0) {
+		cameraPosition += -(oldMouseMiddleXoffset - mouseMiddle_xoffset) * offsetFactor * -cameraXoffset;
+		oldMouseMiddleXoffset = mouseMiddle_xoffset;
 	}
-	if (mouseMiddle_yoffset != 0.0) {
-		update_position += -mouseMiddle_yoffset * offset_factor * -camera_yoffset;
+	if ( (oldMouseMiddleYoffset - mouseMiddle_yoffset) != (float_t)0.0) {
+		cameraPosition += (oldMouseMiddleYoffset - mouseMiddle_yoffset) * offsetFactor * -cameraYoffset;
+		oldMouseMiddleYoffset = mouseMiddle_yoffset;
 	}
-	
+
 	glm::mat4 viewTrans=glm::mat4(1.0f);
-	viewTrans[3] = glm::vec4(-update_position,1.0f);
+	viewTrans[3] = glm::vec4(-cameraPosition,1.0f);
 	view = glm::transpose(view);
-	lookAt_matrix = view * viewTrans ;
-	view_proj_matrix = persp_matrix * lookAt_matrix;
+	lookAtMatrix = view * viewTrans ;
+
+	viewMatrix = lookAtMatrix;
+	projMatrix = perspMatrix;
 };
 
-glm::mat4 view::getViewProjMatrix() {
-	return view_proj_matrix;
+glm::mat4 view::getViewMatrix() {
+	return viewMatrix;
 };
+
+glm::mat4 view::getProjMatrix() {
+	return projMatrix;
+};
+
 
 glm::vec3 view::getViewSpaceXaxis() {
 	return viewspaceXaxis;
@@ -99,4 +117,3 @@ void view::printMatrix(glm::mat3 matrix) {
 	std::cout << "Matrix3 col2   " << matrix[1][0] << "  " << matrix[1][1] << "  " << matrix[1][2] << std::endl;
 	std::cout << "Matrix3 col3   " << matrix[2][0] << "  " << matrix[2][1] << "  " << matrix[2][2] << std::endl;
 };
-

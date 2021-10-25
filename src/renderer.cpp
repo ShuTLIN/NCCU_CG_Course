@@ -1,25 +1,54 @@
 #include<renderer.h>
 
-renderer::renderer(loadmodel& model, shader& shader, view& camera) {
+renderer::renderer(loadmodel& model, shader& shader, view& camera , uniformConfig& uniform) {
 	shaderObj = &shader;
 	modelObj = &model;
 	cameraObj = &camera;
+	uniformObj = &uniform;
 
 	modelObj->genBuffer();
 	vaoID = modelObj->getVao();
+	modelObj->bindVao();
+
 	//std::cout << "VAO: " << vaoID << std::endl;
-	view_proj_matrix = cameraObj->getViewProjMatrix();
-	model_matrix = modelObj->getModelMatrix();
+	viewMatrix = cameraObj->getViewMatrix();
+	projMatrix = cameraObj->getProjMatrix();
+	modelMatrix = modelObj->getModelMatrix();
 
 	//binding shader and get attrib location
 	shaderObj->createShader();
 	shaderObj->genShaderProgram();
 	shaderObj->bindShaderProgram();
 
-	v_position = shaderObj->getShaderAttribLocation("vPosition");
-	v_color = shaderObj->getShaderAttribLocation("vColor");
-	u_model_view_matrix = shaderObj->getShaderUniformLocation("uViewProjMatrix");
-	u_model_matrix = shaderObj->getShaderUniformLocation("uModelMatrix");
+	uProjMatrix = shaderObj->getShaderUniformLocation("uProjMatrix");
+	uModelMatrix = shaderObj->getShaderUniformLocation("uModelMatrix");
+	uViewMatrix = shaderObj->getShaderUniformLocation("uViewMatrix");
+
+	//set all uniform variable value in shader
+	shaderObj->initUniform(*uniformObj);
+}
+
+renderer::renderer(loadmodel& model , shader& shader, view& camera ) {
+	shaderObj = &shader;
+	cameraObj = &camera;
+	modelObj = &model;
+
+	modelObj->genBuffer();
+	vaoID = modelObj->getVao();
+	modelObj->bindVao();
+
+	viewMatrix = cameraObj->getViewMatrix();
+	projMatrix = cameraObj->getProjMatrix();
+
+	//binding shader and get attrib location
+	shaderObj->createShader();
+	shaderObj->genShaderProgram();
+	shaderObj->bindShaderProgram();
+
+	
+	uProjMatrix = shaderObj->getShaderUniformLocation("uProjMatrix");
+	uModelMatrix = shaderObj->getShaderUniformLocation("uModelMatrix");
+	uViewMatrix = shaderObj->getShaderUniformLocation("uViewMatrix");
 }
 
 renderer::~renderer(){
@@ -28,23 +57,39 @@ renderer::~renderer(){
 
 
 void renderer::render() {
-
-	//std::cout << v_position << " " << v_color << " " << u_model_view_matrix << " " << std::endl;
-	/*std::cout << "view_proj_matrix col1  " << view_proj_matrix[0][0] << ' ' << view_proj_matrix[0][1] << " " << view_proj_matrix[0][2] << std::endl;
-	std::cout << "view_proj_matrix col2  " << view_proj_matrix[1][0] << ' ' << view_proj_matrix[1][1] << " " << view_proj_matrix[1][2] << std::endl;
-	std::cout << "view_proj_matrix col3  " << view_proj_matrix[2][0] << ' ' << view_proj_matrix[2][1] << " " << view_proj_matrix[2][2] << std::endl;
-	std::cout << "view_proj_matrix col4  " << view_proj_matrix[3][0] << ' ' << view_proj_matrix[3][1] << " " << view_proj_matrix[3][2] << std::endl;*/
-
 	shaderObj->bindShaderProgram();
+
+	//set MVP matrix in buffer
+	if (shaderObj->findUniformName("uProjMatrix")) {
+		glUniformMatrix4fv(shaderObj->getShaderUniformLocation("uProjMatrix"), 1, GL_FALSE, glm::value_ptr(cameraObj->getProjMatrix()));
+	};
+	if (shaderObj->findUniformName("uViewMatrix")) {
+		glUniformMatrix4fv(shaderObj->getShaderUniformLocation("uViewMatrix"), 1, GL_FALSE, glm::value_ptr(cameraObj->getViewMatrix()));
+	};
+	if (shaderObj->findUniformName("uModelMatrix")) {
+		glUniformMatrix4fv(shaderObj->getShaderUniformLocation("uModelMatrix"), 1, GL_FALSE, glm::value_ptr(modelObj->getModelMatrix()));
+	};
+
+
+	if (modelObj->getModelType() == "Voxel") {
+		renderVoxel();
+	}
+
+	if (modelObj->getModelType() == "Vertex") {
+		renderVertex();
+	}
+}
+
+void renderer::renderVoxel() {
 	modelObj->bindVao();
-	view_proj_matrix = cameraObj->getViewProjMatrix();
-	model_matrix = modelObj->getModelMatrix();
+	//std::cout << modelObj->getVertexNum() << std::endl;
+	glDrawArrays(GL_TRIANGLES, 0, modelObj->getVertexNum());
+	shaderObj->UnBindShaderProgram();
+}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUniformMatrix4fv(u_model_view_matrix, 1, GL_FALSE, glm::value_ptr(view_proj_matrix));
-	glUniformMatrix4fv(u_model_matrix, 1, GL_FALSE, glm::value_ptr(model_matrix));
-
-	glDrawElements(GL_TRIANGLES, modelObj->getIndexLen() , GL_UNSIGNED_INT, nullptr);
-
+void renderer::renderVertex() {
+	modelObj->bindVao();
+	//std::cout << modelObj->getVertexNum() << std::endl;
+	glDrawArrays(GL_TRIANGLES, 0, modelObj->getVertexNum());
 	shaderObj->UnBindShaderProgram();
 }

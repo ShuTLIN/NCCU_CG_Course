@@ -1,14 +1,20 @@
 #version 330
 
-layout(location=0) in vec4 vPosition;
-layout(location=1) in vec4 vColor;
+layout( location = 0 ) in vec4 v_Position;
+layout( location=1) in vec4 v_Color;
+layout(location =2) in vec4 v_Normal;
 
-uniform mat4 uViewProjMatrix;
+uniform mat4 uProjMatrix;
 uniform mat4 uModelMatrix;
+uniform mat4 uViewMatrix;
 
 out vec4 color;
+out vec4 normal;
+out mat4 viewMatrix;
 
 void main () {
-	gl_Position = uViewProjMatrix * uModelMatrix * vPosition;
-	color = vColor;
+	gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * v_Position;
+	color = v_Color;
+	normal =  uViewMatrix * uModelMatrix * v_Normal;
+	viewMatrix = uViewMatrix;
 }

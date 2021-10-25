@@ -51,19 +51,19 @@ namespace Buttom {
 
       
           mouseRight_xoffset += xpos - mouseOldXpos;
-          if (mouseRight_xoffset > 90.0f) {
-              mouseRight_xoffset = 90.0f;
+          if (mouseRight_xoffset > 89.0f) {
+              mouseRight_xoffset = 89.0f;
           }
-          else if (mouseRight_xoffset < -90.0f) {
-              mouseRight_xoffset = -90.0f;
+          else if (mouseRight_xoffset < -89.0f) {
+              mouseRight_xoffset = -89.0f;
           }
 
           mouseRight_yoffset += ypos - mouseOldYpos;
-          if (mouseRight_yoffset > 90.0f) {
-              mouseRight_yoffset = 90.0f;
+          if (mouseRight_yoffset > 89.0f) {
+              mouseRight_yoffset = 89.0f;
           }
-          else if (mouseRight_yoffset < -90.0f) {
-              mouseRight_yoffset = -90.0f;
+          else if (mouseRight_yoffset < -89.0f) {
+              mouseRight_yoffset = -89.0f;
           }
  
           mouseOldXpos = xpos;

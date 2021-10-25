@@ -26,4 +26,6 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/models)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/shaders/vshader.glsl ${CMAKE_CURRENT_BINARY_DIR}/src/shaders/ COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/shaders/fshader.glsl ${CMAKE_CURRENT_BINARY_DIR}/src/shaders/ COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/shaders/vgrid.glsl ${CMAKE_CURRENT_BINARY_DIR}/src/shaders/ COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/shaders/fgrid.glsl ${CMAKE_CURRENT_BINARY_DIR}/src/shaders/ COPYONLY)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
