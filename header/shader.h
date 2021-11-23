@@ -48,6 +48,23 @@ public:
 	void printShaderContent();
 	void setCamUniformLocation(glm::mat4* matrix);
 	
+	template<typename T, size_t N>
+	void setUniform(const std::string uniformName, T uniformValue) {
+		static_assert(false);
+	}
+
+	template<>
+	void setUniform<float,1>(const std::string uniformName, float uniformValue) {
+		bindShaderProgram();
+		glUniform1f(getShaderUniformLocation(uniformName.c_str()), uniformValue);
+	};
+
+	template<>
+	void setUniform<float*,3>(const std::string uniformName, float* uniformValue) {
+		bindShaderProgram();
+		glUniform3fv(getShaderUniformLocation(uniformName.c_str()), 1, uniformValue);
+	}
+
 
 	void initUniform(uniformConfig& uniform);
 	bool findUniformName(const std::string& name);

@@ -151,13 +151,14 @@ void shader::genShaderProgram() {
 void shader::bindShaderProgram() {
 	glUseProgram(shaderProgramID);
 
+	//if first binding shader,then set all uniform variable
 	if (!uniformSet) {
 		setUniformBuffer();
 		uniformSet = true;
 	}
 
 	if (!attribSet) {
-		shader::setVertexAttrib();
+		setVertexAttrib();
 		attribSet = true;
 	}
 	//std::cout << shaderProgramID << std::endl;
@@ -185,18 +186,28 @@ void shader::initUniform(uniformConfig& uniform) {
 	std::vector<void*> uniformDataPtr= uniform.getUniformDataPtrList();
 	
 	uint32_t offsetByte = 0;
-	for (auto& element : uniformName) {
+	for (int i = 0; i < uniformName.size(); i++) {
 		for (auto& uniformList : uniformPropsList) {
-			if (element.find(uniformList.name) != std::string::npos) {
+			if (uniformName[i].compare(uniformList.name) == 0) {
 
 				bindShaderProgram();
+				if (uniformList.type == GL_FLOAT_VEC3  ) {
+					std::cout << "Uniform name: " << uniformList.name << "    Type: GL_FLOAT_VEC3     " \
+						"Size:  " << uniformList.size << std::endl;
+					//std::cout << "current offset byte: " << offsetByte << std::endl;
+					memcpy((char*)uniformBuffer + offsetByte, (uniformDataPtr[i]), uniformList.size);
+					
+					glUniform3fv(uniformList.index, 1, (float*)((char*)uniformBuffer + offsetByte));
+				}
+				else if (uniformList.type == GL_FLOAT) {
+					std::cout << "Uniform name: " << uniformList.name << "    Type: GL_FLOAT     " \
+						"Size:  " << uniformList.size << std::endl;
+					//std::cout << "current offset byte: " << offsetByte << std::endl;
+					memcpy((char*)uniformBuffer + offsetByte, (uniformDataPtr[i]), uniformList.size);
+					 
+					glUniform1fv(uniformList.index, 1, (float*)((char*)uniformBuffer + offsetByte));
+				}
 
-				std::cout << "current offset byte: " << offsetByte <<std::endl;
-				memcpy((char*)uniformBuffer + offsetByte, (uniformDataPtr[0]) , uniformList.size);
-
-				glUniform3fv(uniformList.index , 1, (float*)((char*)uniformBuffer + offsetByte));
-				
-				//std::cout << *((float*)uniformDataPtr[0]+1) << std::endl;
 			}
 
 			offsetByte += uniformList.size;
@@ -272,15 +283,16 @@ void shader::setUniformBuffer() {
 			BufferSize += element.size;
 			break;
 		default:
-			std::cout << "Not find property type match this uniform data type" << std::endl;
+			std::cout << "Not find property type match  "<< element .name<<"  this uniform data type" << std::endl;
 			break;
 		}
-		std::cout << "shader uniform: " << element.name << std::endl;
+		/*std::cout << "shader uniform: " << element.name << std::endl;
 		std::cout << "Index: " << uniformIndex << std::endl;
 		std::cout << "Uniform DataBuffer Size: " << BufferSize << " bytes" << std::endl;
-		std::cout << "++++++++++++++++++++++++++++++++++++" << std::endl;
+		std::cout << "++++++++++++++++++++++++++++++++++++" << std::endl;*/
 	}
 
 	uniformBufferSize = BufferSize;
 	uniformBuffer = (void*)malloc(uniformBufferSize);
 };
+

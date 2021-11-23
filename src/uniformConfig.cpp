@@ -8,13 +8,13 @@ uniformConfig::uniformConfig(std::vector<std::string> Name, std::vector<void*> D
 	uniformDataPtr = DataPtr;
 }
 
-void uniformConfig::printName() {
+void uniformConfig::printNameList() {
 	for (auto& element : uniformName) {
 		std::cout << element << std::endl;
 	}
 }
 
-void uniformConfig::printValue() {
+void uniformConfig::printValueList() {
 	for (auto& element : uniformDataPtr) {
 		std::cout << *((float*)element+1) << std::endl;
 	}

@@ -7,6 +7,8 @@
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
 
+#define TARGET_FPS 60.0
+
 void demo_load_and_save(std::string filepath);
 
 //all state logging
@@ -48,7 +50,7 @@ int main(int argc, char** argv) {
 
     // ! Make the window's context current
     glfwMakeContextCurrent(window);
-
+   
     // Initialize GLEW
     // Turn this on to get Shader based OpenGL
     glewExperimental = GL_TRUE;
@@ -96,13 +98,18 @@ int main(int argc, char** argv) {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     //load shader, model and setting camera
-    view camera(45.0f, window_width / window_height , glm::vec3(0.0f, -25.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::vec3 camPos(0.0f, -35.0f, 0.0f);
+    view camera(45.0f, window_width / window_height , camPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     shader voxShader("./shaders/vshader.glsl", "./shaders/fshader.glsl");
+    shader objShader("./shaders/vshader.glsl", "./shaders/fshader.glsl");
+    shader toonShader("./shaders/vtoon.glsl", "./shaders/ftoon.glsl");
     shader gridShader("./shaders/vgrid.glsl","./shaders/fgrid.glsl");
-    loadmodel model("./models/sword.vox");
+    loadmodel voxModel("./models/sword.vox");
+    loadmodel objModel("./models/slime.obj");
     loadmodel gridModel;
 
     // Our Imgui state
+    bool showGrid = true;
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -110,34 +117,52 @@ int main(int argc, char** argv) {
     static float_t localRotate[3] = { 0.0f, 0.0f ,0.0f };
     static float_t globalRotate[3] = { 0.0f, 0.0f ,0.0f };
     static float_t localScale[3] = { 1.0f, 1.0f ,1.0f };
-    static float_t lightDir[3] = { 1.0f, 0.0f ,0.0f };
-    
+    static float_t lightDir[3] = { 1.0f, 1.0f ,-1.0f };
+    static const char* selectable[] = { "Constant", "Phong" , "Toon" };
+    static int selectItem = 0;
 
-    //create buffer to contain default uniform variable value that will be used in shader 
-    std::vector<std::string> uniformname = { "u_lightDir" };
-    std::vector<void*> uniformdata = { &lightDir[0] };
+    //create buffer to initial default uniform value which will be used in shader 
+    std::vector<std::string> uniformname = { "u_lightDir"};
+    std::vector<void*> uniformdata = { &lightDir[0]};
     uniformConfig uniformInfo(uniformname, uniformdata);
 
     //binding all together
-    renderer voxel(model , voxShader , camera , uniformInfo);
+    renderer voxel(voxModel, voxShader, camera , uniformInfo);
+    renderer obj(objModel, objShader, camera, uniformInfo);
+    renderer toon(objModel, toonShader, camera, uniformInfo);
     renderer grid(gridModel , gridShader , camera);
 
   // Loop until the user closes the window
+  double lasttime = glfwGetTime();
   while (glfwWindowShouldClose(window) == 0) {
-    gridShader.bindShaderProgram();
-    glUniform1f(gridShader.getShaderUniformLocation("u_width"), window_width);
-    glUniform1f(gridShader.getShaderUniformLocation("u_height"), window_height);
-
-    //listen to mouse event
+    gridShader.setUniform<float,1>("u_width", window_width);
+    gridShader.setUniform<float,1>("u_height", window_height);
+  
+    //listen to mouse state
     if (mouseEvent) {
         camera.updateViewMatrix(mouseScroll, mouseMiddle_xoffset, mouseMiddle_yoffset, mouseRight_xoffset, mouseRight_yoffset);
+        
         mouseEvent = false;
     }
     // Render model here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    voxel.render();
-    grid.render();
 
+    switch (selectItem) {
+        case 0:
+            voxel.render();
+            break;
+        case 1:
+            obj.render();
+            break;
+        case 2:
+            toon.render();
+            break;
+        default:
+            break;
+    }
+
+    if(showGrid) grid.render();
+ 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -150,13 +175,26 @@ int main(int argc, char** argv) {
         ImGui::SliderFloat3("Local Rotate.", &localRotate[0], -360.0f, 360.0f);
         ImGui::SliderFloat3("Local Scale.", &localScale[0], 1.0f, 10.0f);
         ImGui::SliderFloat3("Global Rotate.", &globalRotate[0], -360.0f, 360.0f);
+        ImGui::ListBox("Shading Type",&selectItem,selectable,IM_ARRAYSIZE(selectable));
+        ImGui::Checkbox("Grid", &showGrid);
 
+        if (selectItem==0) {
+            voxModel.localTranslate(localTrans[0], localTrans[1], localTrans[2]);
+            voxModel.localRotate(localRotate[0], localRotate[1], localRotate[2]);
+            voxModel.localScale(localScale[0], localScale[1], localScale[2]);
+            voxModel.globalRotate(globalRotate[0], globalRotate[1], globalRotate[2]);
+        }
+        
+        if (selectItem == 1 || selectItem == 2) {
+            objModel.localTranslate(localTrans[0], localTrans[1], localTrans[2]);
+            objModel.localRotate(localRotate[0], localRotate[1], localRotate[2]);
+            objModel.localScale(localScale[0], localScale[1], localScale[2]);
+            objModel.globalRotate(globalRotate[0], globalRotate[1], globalRotate[2]);
+        }
 
-        model.localTranslate(localTrans[0], localTrans[1], localTrans[2]);
-        model.localRotate(localRotate[0], localRotate[1], localRotate[2]);
-        model.localScale(localScale[0], localScale[1], localScale[2]);
-        model.globalRotate(globalRotate[0], globalRotate[1], globalRotate[2]);
-
+        if (selectItem == 2) {
+           /**/
+        }
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
@@ -178,6 +216,14 @@ int main(int argc, char** argv) {
 
     // Poll for and process events
     glfwPollEvents();
+
+    //Limit framerate
+    while (glfwGetTime() < lasttime + 1.0 / TARGET_FPS) {
+        // TODO: Put the thread to sleep, yield, or simply do nothing
+
+    }
+    lasttime += 1.0 / TARGET_FPS;
+    
   }
 
   // Cleanup

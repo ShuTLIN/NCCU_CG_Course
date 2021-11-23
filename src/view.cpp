@@ -97,6 +97,14 @@ glm::vec3 view::getViewSpaceZaxis() {
 	return viewspaceZaxis;
 };
 
+glm::vec3 view::getCameraPos() {
+	return cameraPosition;
+};
+
+glm::vec3 view::getCameraLookDir() {
+	return cameraLookDir;
+};
+
 void view::printVec(glm::vec3 vec) {
 	std::cout << "vec3  " << vec.x << ' ' << vec.y << " " << vec.z << std::endl;
 };

@@ -21,6 +21,8 @@ class view {
   glm::vec3 getViewSpaceXaxis();
   glm::vec3 getViewSpaceYaxis();
   glm::vec3 getViewSpaceZaxis();
+  glm::vec3 getCameraPos();
+  glm::vec3 getCameraLookDir();
   glm::mat4 getViewMatrix();
   glm::mat4 getProjMatrix();
 

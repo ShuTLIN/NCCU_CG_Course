@@ -11,8 +11,8 @@ public:
 
 	std::vector<std::string> getUniformList();
 	std::vector<void*>	getUniformDataPtrList();
-	void printName();
-	void printValue();
+	void printNameList();
+	void printValueList();
 private:
 	std::vector<std::string> uniformName;
 	std::vector<void*> uniformDataPtr;

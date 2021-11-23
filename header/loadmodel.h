@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include<iostream>
 #include<string>
+#include<array>
+#include<fstream>
 #include<vector>
 
 #include "glm/vec3.hpp"
@@ -64,11 +66,15 @@ private:
 	uint32_t vbo;
 	uint32_t ibo;
 	uint32_t vertexNum;
+	std::string filePath;
 	std::string modelType;
+	std::vector<vertexBuffer> objModel;
 	std::vector<voxelBuffer> modeldata;
-	std::vector<uint32_t> indexdata;
 	std::vector<glm::vec4> vertexData;
+	std::vector<uint32_t> indexdata;
 	voxelBuffer initVoxelData;
+	void loadVoxel();
+	void loadObj();
 
 	glm::vec3 oldRotate;
 	glm::mat4 modelMatrix;

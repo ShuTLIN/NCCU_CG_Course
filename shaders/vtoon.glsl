@@ -8,17 +8,18 @@ uniform mat4 uProjMatrix;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 
+
 out vec4 color;
 out vec4 normal;
-out vec3 vertexPos;
+out vec3 posInView;
 out mat4 viewMatrix;
 
 
 void main () {
 	gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * v_Position;
-	
 	color = v_Color;
-	vertexPos = vec3(uViewMatrix * uModelMatrix * v_Position);
+	posInView = normalize(vec3(uViewMatrix * uModelMatrix * v_Position));
+	
 	normal =  transpose(inverse(uViewMatrix * uModelMatrix)) * v_Normal;
 	viewMatrix = uViewMatrix;
 }

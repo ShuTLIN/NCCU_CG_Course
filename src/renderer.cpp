@@ -78,6 +78,9 @@ void renderer::render() {
 	if (modelObj->getModelType() == "Vertex") {
 		renderVertex();
 	}
+	if (modelObj->getModelType() == "Obj") {
+		renderVertex();
+	}
 }
 
 void renderer::renderVoxel() {
