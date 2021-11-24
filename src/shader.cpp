@@ -186,17 +186,17 @@ void shader::initUniform(uniformConfig& uniform) {
 	std::vector<void*> uniformDataPtr= uniform.getUniformDataPtrList();
 	
 	uint32_t offsetByte = 0;
-	for (int i = 0; i < uniformName.size(); i++) {
+	for (int i = 0; i < uniformName.size() ; i++) {
 		for (auto& uniformList : uniformPropsList) {
 			if (uniformName[i].compare(uniformList.name) == 0) {
 
 				bindShaderProgram();
-				if (uniformList.type == GL_FLOAT_VEC3  ) {
-					std::cout << "Uniform name: " << uniformList.name << "    Type: GL_FLOAT_VEC3     " \
+				if (uniformList.type == GL_FLOAT_VEC3) {
+					std::cout << "Uniform name: " << uniformList.name   <<"    Type: GL_FLOAT_VEC3     " \
 						"Size:  " << uniformList.size << std::endl;
 					//std::cout << "current offset byte: " << offsetByte << std::endl;
 					memcpy((char*)uniformBuffer + offsetByte, (uniformDataPtr[i]), uniformList.size);
-					
+
 					glUniform3fv(uniformList.index, 1, (float*)((char*)uniformBuffer + offsetByte));
 				}
 				else if (uniformList.type == GL_FLOAT) {
@@ -204,7 +204,7 @@ void shader::initUniform(uniformConfig& uniform) {
 						"Size:  " << uniformList.size << std::endl;
 					//std::cout << "current offset byte: " << offsetByte << std::endl;
 					memcpy((char*)uniformBuffer + offsetByte, (uniformDataPtr[i]), uniformList.size);
-					 
+
 					glUniform1fv(uniformList.index, 1, (float*)((char*)uniformBuffer + offsetByte));
 				}
 

@@ -135,8 +135,10 @@ int main(int argc, char** argv) {
   // Loop until the user closes the window
   double lasttime = glfwGetTime();
   while (glfwWindowShouldClose(window) == 0) {
-    gridShader.setUniform<float,1>("u_width", window_width);
-    gridShader.setUniform<float,1>("u_height", window_height);
+    gridShader.bindShaderProgram();
+    glUniform1f(gridShader.getShaderUniformLocation("u_width"), window_width);
+    glUniform1f(gridShader.getShaderUniformLocation("u_height"), window_height);
+
   
     //listen to mouse state
     if (mouseEvent) {

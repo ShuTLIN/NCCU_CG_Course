@@ -1,18 +1,21 @@
 ﻿
 cmake_minimum_required (VERSION 3.8)
 
-if(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++11")
-endif(APPLE)
-
 #SET(CMAKE_C_COMPILER "/usr/local/bin/gcc-11")
 #SET(CMAKE_CXX_COMPILER "/usr/local/bin/g++-11")
 
 project ("NCCU_CG_Course")
 
-add_subdirectory("glew")
-add_subdirectory("glfw")
-add_subdirectory ("src")
+if(APPLE)
+  set(CMAKE_CXX_FLAGS "-std=c++11")
+  find_package(glfw3 3.3 REQUIRED)
+  add_subdirectory("glew")
+  add_subdirectory ("src")
+else()
+  add_subdirectory("glew")
+  add_subdirectory("glfw")
+  add_subdirectory ("src")
+endif()
 
 target_include_directories("NCCU_CG_Course" PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories("NCCU_CG_Course" PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/venders/imgui-1.84)
