@@ -36,3 +36,5 @@
 
 #cmake dev folder
 out
+
+!/models/*.obj
