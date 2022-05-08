@@ -106,6 +106,7 @@ int main(int argc, char** argv) {
     shader gridShader("./shaders/vgrid.glsl","./shaders/fgrid.glsl");
     loadmodel voxModel("./models/sword.vox");
     loadmodel objModel("./models/slime.obj");
+    loadmodel objModel2("./models/slime.obj");
     loadmodel gridModel;
 
     // Our Imgui state
@@ -128,7 +129,7 @@ int main(int argc, char** argv) {
 
     //binding all together
     renderer voxel(voxModel, voxShader, camera , uniformInfo);
-    renderer obj(objModel, objShader, camera, uniformInfo);
+    renderer obj(objModel2, objShader, camera, uniformInfo);
     renderer toon(objModel, toonShader, camera, uniformInfo);
     renderer grid(gridModel , gridShader , camera);
 
@@ -192,6 +193,11 @@ int main(int argc, char** argv) {
             objModel.localRotate(localRotate[0], localRotate[1], localRotate[2]);
             objModel.localScale(localScale[0], localScale[1], localScale[2]);
             objModel.globalRotate(globalRotate[0], globalRotate[1], globalRotate[2]);
+
+            objModel2.localTranslate(localTrans[0], localTrans[1], localTrans[2]);
+            objModel2.localRotate(localRotate[0], localRotate[1], localRotate[2]);
+            objModel2.localScale(localScale[0], localScale[1], localScale[2]);
+            objModel2.globalRotate(globalRotate[0], globalRotate[1], globalRotate[2]);
         }
 
         if (selectItem == 2) {
